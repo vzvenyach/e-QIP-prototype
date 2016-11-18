@@ -10,7 +10,7 @@ import (
 
 var (
 	// APIName ...
-	APIName = "equip"
+	APIName = "eqip"
 
 	// APIVersion ...
 	APIVersion = "v1"
@@ -20,7 +20,7 @@ func main() {
 	r := middleware.NewRouter().Inject(LoggerHandler)
 	r.HandleFunc("/", rootHandler)
 
-	s := r.PathPrefix("/").Subrouter().Inject(SessionHandler)
+	s := r.PathPrefix("/").Subrouter().Inject(SessionHandler, OAuthHandler)
 	s.HandleFunc("/form", rootHandler)
 
 	o := r.PathPrefix("/auth").Subrouter()

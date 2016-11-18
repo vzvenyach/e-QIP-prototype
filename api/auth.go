@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/gob"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -16,9 +20,44 @@ import (
 )
 
 var (
-	oauthStateString = "random"
-	redirectTo       = os.Getenv("API_REDIRECT")
+	oauthStateString     = "random"
+	redirectTo           = os.Getenv("API_REDIRECT")
+	ErrNoSuchOAuthToken  = errors.New("OAuth Token does not exist")
+	ErrInvalidOAuthToken = errors.New("Invalid OAuth Token")
 )
+
+func init() {
+	// Allow structs to be stored in session
+	gob.Register(oauth2.Token{})
+}
+
+// Middleware that checks if token is currently in the session and whether
+// the token is valid
+func OAuthHandler(w http.ResponseWriter, r *http.Request) error {
+	log.Println("OAuth2 Middleware")
+
+	session, err := store.Get(r, sessionName)
+	if err != nil {
+		return err
+	}
+
+	var token oauth2.Token
+	var ok bool
+
+	// Ensure token exists in session
+	if token, ok = session.Values["token"].(oauth2.Token); !ok {
+		return ErrNoSuchOAuthToken
+	}
+
+	// Ensure token is valid (not expired and contains access token)
+	if !token.Valid() {
+		return ErrInvalidOAuthToken
+	}
+
+	log.Println("OAuth2 Token Successfully retrieved from session")
+
+	return nil
+}
 
 // authServiceHandler is the initial entry point for authentication.
 func authServiceHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,6 +96,17 @@ func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
 		return
 	}
+
+	session, _ := store.Get(r, sessionName)
+
+	// Github access tokens last forever. Add manual expiry for testing
+	token.Expiry = time.Now().Add(time.Minute * 10)
+
+	// Store token in session
+	session.Values["token"] = token
+
+	// Persist session data
+	session.Save(r, w)
 
 	redirectToWithToken := fmt.Sprintf("%s?token=%s&refresh=%s&expiration=%s", redirectTo, token.AccessToken, token.RefreshToken, token.Expiry)
 	http.Redirect(w, r, redirectToWithToken, http.StatusTemporaryRedirect)

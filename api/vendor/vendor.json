@@ -89,6 +89,18 @@
 			"revisionTime": "2016-03-17T21:34:30Z"
 		},
 		{
+			"checksumSHA1": "veX5bpYOBjZZWMyWxXxys8EH9d8=",
+			"path": "github.com/gorilla/securecookie",
+			"revision": "fa5329f913702981df43dcb2a380bac429c810b5",
+			"revisionTime": "2016-10-03T05:16:01Z"
+		},
+		{
+			"checksumSHA1": "f1dfF3vmO95G/hbwMYlFru/FfMo=",
+			"path": "github.com/gorilla/sessions",
+			"revision": "ca9ada44574153444b00d3fd9c8559e4cc95f896",
+			"revisionTime": "2016-09-22T14:58:04Z"
+		},
+		{
 			"checksumSHA1": "0yaHzWgrBrekgxgn23ka9/IURL8=",
 			"path": "github.com/truetandem/e-qip-prototype/api",
 			"revision": "a8a188deb3f3ba01a556489150c6e9b3b29e9550",
