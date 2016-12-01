@@ -17,11 +17,6 @@ type BasicAuthMembership struct {
 	db           *pg.DB
 }
 
-// WithContext sets a db connection for a particular model
-func (b *BasicAuthMembership) WithContext(ctx *pg.DB) {
-	b.db = ctx
-}
-
 // PasswordMatch determines if a plain text password matches its equivalent password hash
 func (b *BasicAuthMembership) PasswordMatch(password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(b.PasswordHash), []byte(password)) == nil
