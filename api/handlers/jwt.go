@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/truetandem/e-QIP-prototype/api/db"
-	"github.com/truetandem/e-QIP-prototype/api/model"
+	"github.com/truetandem/e-QIP-prototype/api/service"
 )
 
 var (
@@ -23,10 +22,8 @@ func JwtTokenValidatorHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	token := matches[1]
-	account := model.Account{}
-	account.WithContext(db.NewDB())
 
-	if valid, err := account.ValidJwtToken(token); err != nil || !valid {
+	if valid, err := service.Token.Valid(token); err != nil || !valid {
 		return fmt.Errorf("Invalid authorization token")
 	}
 

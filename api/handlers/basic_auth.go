@@ -3,8 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/truetandem/e-QIP-prototype/api/db"
-	"github.com/truetandem/e-QIP-prototype/api/model"
+	"github.com/truetandem/e-QIP-prototype/api/service"
 )
 
 func BasicAuth(w http.ResponseWriter, r *http.Request) {
@@ -19,21 +18,15 @@ func BasicAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	account := &model.Account{
-		Username: respBody.Username,
-	}
-
-	// Add db connection
-	account.WithContext(db.NewDB())
-
 	// Make sure username and password are valid
-	if err := account.BasicAuthentication(respBody.Password); err != nil {
+	account, err := service.Account.BasicAuthentication(respBody.Username, respBody.Password)
+	if err != nil {
 		ErrorJSON(w, r, err)
 		return
 	}
 
 	// Generate jwt token
-	signedToken, _, err := account.NewJwtToken()
+	signedToken, _, err := service.Token.New(account)
 	if err != nil {
 		ErrorJSON(w, r, err)
 		return
