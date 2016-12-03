@@ -6,8 +6,6 @@ db:
     - ./db:/docker-entrypoint-initdb.d
 web:
   image: abiosoft/caddy
-  volumes:
-    - ./dist:/srv
   ports:
     - "8080:2015"
   links:
@@ -16,24 +14,22 @@ web:
     DATABASE_USER: postgres
     DATABASE_NAME: postgres
     DATABASE_HOST: db
+  volumes:
+      - dist:/srv
+  volumes_from:
+      - frontend:ro
 frontend:
   build: .
   dockerfile: Dockerfile.frontend
   env_file:
     - .env
-  volumes:
-    - .:/usr/src/app
-    - /usr/src/app/node_modules
   command: ./build-frontend.sh
 api:
   build: .
   dockerfile: Dockerfile.api
   env_file:
     - .env
-  working_dir: /go/src/github.com/truetandem/e-QIP-prototype/api
   command: ./run.sh
-  volumes:
-    - .:/go/src/github.com/truetandem/e-QIP-prototype
   ports:
     - "3000:3000"
   links:
