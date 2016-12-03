@@ -24,6 +24,8 @@ frontend:
   env_file:
     - .env
   command: ./build-frontend.sh
+  volumes:
+    - dist:/usr/src/app/dist
 api:
   build: .
   dockerfile: Dockerfile.api
