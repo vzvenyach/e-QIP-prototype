@@ -1,5 +1,8 @@
 FROM golang
+
 RUN mkdir -p /go/src/github.com/truetandem/e-QIP-prototype/
 COPY api /go/src/github.com/truetandem/e-QIP-prototype/api
+
 RUN curl https://glide.sh/get | sh
+
 WORKDIR /go/src/github.com/truetandem/e-QIP-prototype/api

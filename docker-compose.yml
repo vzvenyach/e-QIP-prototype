@@ -1,42 +1,50 @@
-db:
-  expose:
-    - "5432"
-  image: postgres
-  volumes:
-    - ./db:/docker-entrypoint-initdb.d
-web:
-  image: abiosoft/caddy
-  ports:
-    - "8080:2015"
-  links:
-    - db
-  environment:
-    DATABASE_USER: postgres
-    DATABASE_NAME: postgres
-    DATABASE_HOST: db
-  volumes:
-      - dist:/srv
-  volumes_from:
-      - frontend:ro
-frontend:
-  build: .
-  dockerfile: Dockerfile.frontend
-  env_file:
-    - .env
-  command: ./build-frontend.sh
-  volumes:
-    - dist:/usr/src/app/dist
-api:
-  build: .
-  dockerfile: Dockerfile.api
-  env_file:
-    - .env
-  command: ./run.sh
-  ports:
-    - "3000:3000"
-  links:
-    - db
-  environment:
-    DATABASE_USER: postgres
-    DATABASE_NAME: postgres
-    DATABASE_HOST: db:5432
+version: '2'
+services:
+    db:
+      restart: always
+      expose:
+        - "5432"
+      build:
+        context: .
+        dockerfile: Dockerfile.db
+    web:
+      image: abiosoft/caddy
+      ports:
+        - "8080:2015"
+      links:
+        - db
+      environment:
+        DATABASE_USER: postgres
+        DATABASE_NAME: postgres
+        DATABASE_HOST: db
+      volumes:
+          - dist:/srv
+      volumes_from:
+          - frontend:ro
+    frontend:
+      build:
+        context: .
+        dockerfile: Dockerfile.frontend
+      env_file:
+        - .env
+      command: ./build-frontend.sh
+      volumes:
+        - dist:/usr/src/app/dist
+    api:
+      build:
+        context: .
+        dockerfile: Dockerfile.api
+      depends_on:
+        - db
+      env_file:
+        - .env
+      command: ./run.sh
+      ports:
+        - "3000:3000"
+      environment:
+        DATABASE_USER: postgres
+        DATABASE_NAME: postgres
+        DATABASE_HOST: db:5432
+volumes:
+  dist:
+    external: false
